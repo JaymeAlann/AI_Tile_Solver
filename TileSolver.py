@@ -20,7 +20,6 @@ import colors as c
 import itertools
 import collections
 import _thread
-import random
 import time
 import numpy as np
 
@@ -160,7 +159,7 @@ class Solver:
         # The puzzle will be solved
         self.start = start
 
-    def solve_a_star(self) -> None:
+    def solve_a_star(self) -> Node.path:
         # Perform A* search and return a path to the solution, if it exists
         queue = collections.deque([Node(self.start)])
         seen = set()
@@ -179,7 +178,7 @@ class Solver:
                     queue.appendleft(child)
                     seen.add(child.state)
 
-    def solve_uniform_cost(self) -> None:
+    def solve_uniform_cost(self) -> Node.path:
         # Perform Uniform Cost search and return a path to the solution, if it exists
         queue = collections.deque([Node(self.start)])
         seen = set()
@@ -198,7 +197,7 @@ class Solver:
                     queue.appendleft(child)
                     seen.add(child.state)
 
-    def solve_best_first_search(self) -> None:
+    def solve_best_first_search(self) -> Node.path:
         # Perform best first search and return a path to the solution, if it exists
         queue = collections.deque([Node(self.start)])
         seen = set()
@@ -226,10 +225,49 @@ class Game(Frame):
         self.grid()
         self.master.title('AI 8 Puzzle Solver')
 
-        self.main_grid = Frame(self, bg=c.GRID_COLOR, bd=3, width=600, height=600)
+        self.main_grid = Frame(self, bg=c.GRID_COLOR, bd=4, width=500, height=500)
         self.main_grid.grid(pady=(100, 0))
         self.make_GUI()
         self.matrix = []
+
+        top_frame = Frame(self)
+        top_frame.place(relx=0.5, y=45, anchor='center')
+
+        Label(top_frame, text='Enter Matrix', font=c.SCORE_LABEL_FONT).grid(row=0)
+        self.matrix_input = Entry(top_frame, borderwidth=5)
+        self.matrix_input.grid(row=1)
+        self.bot_frame = Frame(self, bg=c.GRID_COLOR, bd=4, width=500, height=250)
+        self.bot_frame.grid()
+        algorithms = [
+            ('Uniform Cost Search', 1),
+            ('Best First Search', 2),
+            ('A* Search', 3)
+        ]
+        algorithm_selected = IntVar()
+        algorithm_selected.set(3)
+        count = 0
+        for algo, mode in algorithms:
+            Radiobutton(self.bot_frame, text=algo, width=18, padx=4, value=mode,
+                        tristatevalue=0, variable=algorithm_selected).grid(row=0, column=count)
+            count += 1
+
+        def button_click() -> None:
+            # Get the initial Matrix order that the AI will solve
+            # In the format of '123456780' or some order there of
+            input_str = str(self.matrix_input.get())
+            algorithm_mode = algorithm_selected.get()
+            self.matrix_input.delete(0, END)  # clears the input box
+            self.matrix.clear()  # clears the default matrix before inserting puzzle
+
+            try:
+                _thread.start_new_thread(self.run, (input_str, algorithm_mode))
+            finally:
+                print("Finished")
+
+        self.start_ai_btn = Button(top_frame, text='Start Algorithm',
+                                   font=c.BUTTON_FONT, command=lambda: button_click())
+        self.start_ai_btn.grid(row=0, column=3, padx=50, pady=10, rowspan=2)
+
         self.mainloop()
 
     def make_GUI(self) -> None:
@@ -244,31 +282,8 @@ class Game(Frame):
                 row.append(cell_data)
             self.cells.append(row)
 
-        score_frame = Frame(self)
-        score_frame.place(relx=0.5, y=45, anchor='center')
-
-        Label(score_frame, text='Enter Matrix', font=c.SCORE_LABEL_FONT).grid(row=0)
-        self.matrix_input = Entry(score_frame, borderwidth=5)
-        self.matrix_input.grid(row=1)
-
-        def button_click() -> None:
-            # Get the initial Matrix order that the AI will solve
-            # In the format of '123456780' or some order there of
-            input_str = str(self.matrix_input.get())
-            self.matrix_input.delete(0, END)  # clears the input box
-            # self.matrix.clear()  # clears the default matrix before inserting puzzle
-            # Creates the Matrix Puzzle
-            '''self.run(input_str)'''
-            try:
-                _thread.start_new_thread(self.run, (input_str,))
-            finally:
-                print("Finished")
-
-        self.start_ai_btn = Button(score_frame, text='Start Algorithm',
-                                   font=c.BUTTON_FONT, command=lambda: button_click())
-        self.start_ai_btn.grid(row=0, column=3, padx=50, pady=10, rowspan=2)
-
-    def run(self, input_str: str) -> None:
+    def run(self, input_str: str, algo_mode: int) -> None:
+        print('Running')
         for index in range(len(input_str)):
             if index % 3 == 0:
                 sub = input_str[index:index + 3]
@@ -284,8 +299,15 @@ class Game(Frame):
 
         puzzle = Puzzle(self.matrix)
         s = Solver(puzzle)
+
+        def switch(case):
+            switcher = {1: s.solve_uniform_cost(),
+                        2: s.solve_best_first_search(),
+                        3: s.solve_a_star()}
+            return switcher.get(case)
+
         tic = time.perf_counter()
-        p = s.solve_a_star()
+        p = switch(algo_mode)
         toc = time.perf_counter()
 
         steps = -1
