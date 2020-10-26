@@ -286,6 +286,7 @@ class Game(Frame):
                 row.append(cell_data)
             self.cells.append(row)
 
+    # Runs the algorithm against the matrix input
     def run(self, input_str: str, algo_mode: int) -> None:
         print('Running')
         for index in range(len(input_str)):
@@ -304,17 +305,21 @@ class Game(Frame):
         puzzle = Puzzle(self.matrix)
         s = Solver(puzzle)
 
+        # Determines which algorithm to use based off radio button selection
         def switch(case):
             switcher = {1: s.solve_uniform_cost(),
                         2: s.solve_best_first_search(),
                         3: s.solve_a_star()}
             return switcher.get(case)
 
+        # Toc - Tic will give the time that the computer takes
+        # To find the solution path
         tic = time.perf_counter()
         p = switch(algo_mode)
         toc = time.perf_counter()
         steps = -1
-        self.results_label.configure(text="TIME: "+ str(toc - tic) + "\nSTEPS: " + str(steps))
+        self.results_label.configure(text="TIME: " + str(toc - tic) + "\nSTEPS: " + str(steps))
+        # Loops through the nodes in the path and changes the GUI display matrix to show each step taken
         for node in p:
             for row in range(3):
                 for col in range(3):
@@ -327,8 +332,9 @@ class Game(Frame):
                             text=str(node.puzzle.board[row][col]),
                             font=c.CELL_NUMBER_FONTS)
             steps += 1
-            self.results_label.configure(text="TIME: "+ str(toc - tic) + "\nSTEPS: " + str(steps))
+            self.results_label.configure(text="TIME: " + str(toc - tic) + "\nSTEPS: " + str(steps))
             self.update_idletasks()
+            # One second thread sleep to allow time for us to visually observe the puzzle being solved.
             time.sleep(1)
         self.update_idletasks()
 
