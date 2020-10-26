@@ -166,7 +166,7 @@ class Solver:
         seen.add(queue[0].state)
         while queue:
             # Sorts the queue based on Lowest cost of both Heuristic and Manhattan distance combine
-            queue = collections.deque(sorted(list(queue), key=lambda node: node.f))
+            queue = collections.deque(sorted(list(queue), key=lambda node: node.f()))
             node = queue.popleft()
             if node.solved:
                 return node.path
@@ -204,7 +204,7 @@ class Solver:
         seen.add(queue[0].state)
         while queue:
             # Sorts the queue based on the heuristic score of each node (in this case the manhattan distance)
-            queue = collections.deque(sorted(list(queue), key=lambda node: node.h))
+            queue = collections.deque(sorted(list(queue), key=lambda node: node.h()))
             node = queue.popleft()
             if node.solved:
                 return node.path
@@ -236,7 +236,7 @@ class Game(Frame):
         Label(top_frame, text='Enter Matrix', font=c.SCORE_LABEL_FONT).grid(row=0)
         self.matrix_input = Entry(top_frame, borderwidth=5)
         self.matrix_input.grid(row=1)
-        self.bot_frame = Frame(self, bg=c.GRID_COLOR, bd=4, width=500, height=250)
+        self.bot_frame = Frame(self, bd=4, width=500, height=250)
         self.bot_frame.grid()
         algorithms = [
             ('Uniform Cost Search', 1),
@@ -250,6 +250,9 @@ class Game(Frame):
             Radiobutton(self.bot_frame, text=algo, width=18, padx=4, value=mode,
                         tristatevalue=0, variable=algorithm_selected).grid(row=0, column=count)
             count += 1
+
+        self.results_label = Label(self.bot_frame, text='')
+        self.results_label.grid(row=1, column=1)
 
         def button_click() -> None:
             # Get the initial Matrix order that the AI will solve
@@ -267,7 +270,6 @@ class Game(Frame):
         self.start_ai_btn = Button(top_frame, text='Start Algorithm',
                                    font=c.BUTTON_FONT, command=lambda: button_click())
         self.start_ai_btn.grid(row=0, column=3, padx=50, pady=10, rowspan=2)
-
         self.mainloop()
 
     def make_GUI(self) -> None:
@@ -309,8 +311,8 @@ class Game(Frame):
         tic = time.perf_counter()
         p = switch(algo_mode)
         toc = time.perf_counter()
-
         steps = -1
+        self.results_label.configure(text="TIME: "+ str(toc - tic) + "\nSTEPS: " + str(steps))
         for node in p:
             for row in range(3):
                 for col in range(3):
@@ -322,11 +324,12 @@ class Game(Frame):
                         self.cells[row][col]['number'].configure(
                             text=str(node.puzzle.board[row][col]),
                             font=c.CELL_NUMBER_FONTS)
-            # node.puzzle.pprint()
             steps += 1
+            self.results_label.configure(text="TIME: "+ str(toc - tic) + "\nSTEPS: " + str(steps))
             self.update_idletasks()
             time.sleep(1)
         self.update_idletasks()
+
 
 
 Game()
