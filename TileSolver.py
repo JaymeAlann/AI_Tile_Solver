@@ -166,7 +166,7 @@ class Solver:
         seen.add(queue[0].state)
         while queue:
             # Sorts the queue based on Lowest cost of both Heuristic and Manhattan distance combine
-            queue = collections.deque(sorted(list(queue), key=lambda node: node.f()))
+            queue = collections.deque(sorted(list(queue), key=lambda node: node.f))
             node = queue.popleft()
             if node.solved:
                 return node.path
@@ -204,7 +204,7 @@ class Solver:
         seen.add(queue[0].state)
         while queue:
             # Sorts the queue based on the heuristic score of each node (in this case the manhattan distance)
-            queue = collections.deque(sorted(list(queue), key=lambda node: node.h()))
+            queue = collections.deque(sorted(list(queue), key=lambda node: node.h))
             node = queue.popleft()
             if node.solved:
                 return node.path
@@ -259,7 +259,7 @@ class Game(Frame):
             # In the format of '123456780' or some order there of
             input_str = str(self.matrix_input.get())
             algorithm_mode = algorithm_selected.get()
-            self.matrix_input.delete(0, END)  # clears the input box
+            #self.matrix_input.delete(0, END)  # clears the input box
             self.matrix.clear()  # clears the default matrix before inserting puzzle
 
             try:
@@ -329,7 +329,6 @@ class Game(Frame):
             self.update_idletasks()
             time.sleep(1)
         self.update_idletasks()
-
 
 
 Game()
