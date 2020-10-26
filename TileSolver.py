@@ -117,10 +117,6 @@ class Node:
             self.g = 0
 
     @property
-    def score(self) -> int:
-        return self.g + self.h
-
-    @property
     def state(self) -> str:
         return str(self)  # Return a hashable representation of self
 
@@ -221,21 +217,26 @@ class Game(Frame):
 
     def __init__(self) -> None:
         Frame.__init__(self)
+        # create the grid for the puzzle
         self.cells = []
         self.grid()
         self.master.title('AI 8 Puzzle Solver')
-
+        # Grid used for the 3x3 Puzzle
         self.main_grid = Frame(self, bg=c.GRID_COLOR, bd=4, width=500, height=500)
         self.main_grid.grid(pady=(100, 0))
+        # Method to fill the rest of the GUI and create control over widgets
         self.make_GUI()
         self.matrix = []
-
+        # Top Frame holds the matrix input along with start button
         top_frame = Frame(self)
         top_frame.place(relx=0.5, y=45, anchor='center')
-
-        Label(top_frame, text='Enter Matrix', font=c.SCORE_LABEL_FONT).grid(row=0)
+        Label(top_frame, text='Enter Matrix', font=c.LABEL_FONT).grid(row=0)
         self.matrix_input = Entry(top_frame, borderwidth=5)
         self.matrix_input.grid(row=1)
+        # Bottom Frame is used for the Radio Buttons
+        # Here you can select which algorithm you would like to implement
+        # Along with view how long the AI took to solve the path along with
+        # The steps it takes.
         self.bot_frame = Frame(self, bd=4, width=500, height=250)
         self.bot_frame.grid()
         algorithms = [
@@ -246,6 +247,7 @@ class Game(Frame):
         algorithm_selected = IntVar()
         algorithm_selected.set(3)
         count = 0
+        # For loop to Create buttons
         for algo, mode in algorithms:
             Radiobutton(self.bot_frame, text=algo, width=18, padx=4, value=mode,
                         tristatevalue=0, variable=algorithm_selected).grid(row=0, column=count)
@@ -259,10 +261,9 @@ class Game(Frame):
             # In the format of '123456780' or some order there of
             input_str = str(self.matrix_input.get())
             algorithm_mode = algorithm_selected.get()
-            #self.matrix_input.delete(0, END)  # clears the input box
             self.matrix.clear()  # clears the default matrix before inserting puzzle
-
             try:
+                # Creates a new thread to run the algorithm on as to not freeze the main thread
                 _thread.start_new_thread(self.run, (input_str, algorithm_mode))
             finally:
                 print("Finished")
@@ -273,6 +274,7 @@ class Game(Frame):
         self.mainloop()
 
     def make_GUI(self) -> None:
+        # Nested loop for creating the Grid
         for i in range(3):
             row = []
             for j in range(3):
