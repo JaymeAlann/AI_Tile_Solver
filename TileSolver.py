@@ -1,4 +1,3 @@
-
 import random
 from tkinter import *
 import colors as c
@@ -34,16 +33,15 @@ class Puzzle:
             return lambda: self._move(at, to)
 
         moves = []
-        for i, j in itertools.product(range(self.width),
-                                      range(self.width)):
-            direcs = {'R': (i, j - 1),
-                      'L': (i, j + 1),
-                      'D': (i - 1, j),
-                      'U': (i + 1, j)}
+        for i, j in itertools.product(range(self.width), range(self.width)):
+            directions = {'R': (i, j - 1),
+                          'L': (i, j + 1),
+                          'D': (i - 1, j),
+                          'U': (i + 1, j)}
 
-            for action, (r, c) in direcs.items():
-                if 0 <= r < self.width and 0 <= c < self.width and self.board[r][c] == 0:
-                    move = create_move((i, j), (r, c)), action
+            for action, (row, column) in directions.items():
+                if 0 <= row < self.width and 0 <= column < self.width and self.board[row][column] == 0:
+                    move = create_move((i, j), (row, column)), action
                     moves.append(move)
         return moves
 
