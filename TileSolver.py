@@ -1,18 +1,3 @@
-'''
-To implement Uniform-Cost Search (UCS), Best-First Search (BFS), and A* Algorithm to
-solve the following problems (i.e. find the goal):
-
-
-1) 8 Puzzle Problem:
-The 8 puzzle consists of eight numbered, movable tiles set in a 3x3 frame. One cell of the frame is
-always empty thus making it possible to move an adjacent numbered tile into the empty cell. Start
-with a random state (cannot be fixed). The goal state is listed below.
-1 2 3
-8   4
-7 6 5
-The program is to change the initial configuration into the goal configuration. A solution to the
-problem is an appropriate sequence of moves.
-'''
 
 import random
 from tkinter import *
@@ -91,12 +76,6 @@ class Puzzle:
         copy.board[i][j], copy.board[r][c] = copy.board[r][c], copy.board[i][j]
         return copy
 
-    def pprint(self):
-        # Used for testing. Prints each child node
-        for row in self.board:
-            print(row)
-        print()
-
     def __str__(self) -> str:
         return ''.join(map(str, self))
 
@@ -138,13 +117,13 @@ class Node:
         return self.puzzle.actions  # Wrapper for 'actions' accessible at current state
 
     @property
-    def h(self) -> int:
+    def heuristic(self) -> int:
         return self.puzzle.manhattan  # Return the manhattan distance of the node
         # h stands for your heuristic score
 
     @property
-    def f(self) -> int:
-        return self.h + self.c
+    def finalscore(self) -> int:
+        return self.heuristic + self.c
 
     def __str__(self) -> str:
         return str(self.puzzle)
@@ -164,7 +143,7 @@ class Solver:
         seen.add(queue[0].state)
         while queue:
             # Sorts the queue based on Lowest cost of both Heuristic and Manhattan distance combine
-            queue = collections.deque(sorted(list(queue), key=lambda node: node.f))
+            queue = collections.deque(sorted(list(queue), key=lambda node: node.finalscore))
             node = queue.popleft()
             if node.solved:
                 return node.path
@@ -202,7 +181,7 @@ class Solver:
         seen.add(queue[0].state)
         while queue:
             # Sorts the queue based on the heuristic score of each node (in this case the manhattan distance)
-            queue = collections.deque(sorted(list(queue), key=lambda node: node.h))
+            queue = collections.deque(sorted(list(queue), key=lambda node: node.heuristic))
             node = queue.popleft()
             if node.solved:
                 return node.path
