@@ -122,7 +122,7 @@ class Node:
         # h stands for your heuristic score
 
     @property
-    def finalscore(self) -> int:
+    def final_score(self) -> int:
         return self.heuristic + self.c
 
     def __str__(self) -> str:
